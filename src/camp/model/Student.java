@@ -3,8 +3,8 @@ package camp.model;
 import java.util.List;
 
 public class Student {
-    private String studentId;
-    private String studentName;
+    private final String studentId;
+    private final String studentName;
     private List<Subject> mandatorySubjects;
     private List<Subject> optionalSubjects;
 
