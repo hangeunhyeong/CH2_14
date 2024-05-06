@@ -5,8 +5,10 @@ import camp.model.Student;
 import camp.model.Subject;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 /**
  * Notification
@@ -148,14 +150,16 @@ public class CampManagementApplication {
             System.out.println("수강생 관리 실행 중...");
             System.out.println("1. 수강생 등록");
             System.out.println("2. 수강생 목록 조회");
-            System.out.println("3. 메인 화면 이동");
+            System.out.println("3. 수강생 정보 수정");
+            System.out.println("4. 메인 화면 이동");
             System.out.print("관리 항목을 선택하세요...");
             int input = sc.nextInt();
 
             switch (input) {
                 case 1 -> createStudent(); // 수강생 등록
                 case 2 -> inquireStudent(); // 수강생 목록 조회
-                case 3 -> flag = false; // 메인 화면 이동
+                case 3 -> setStudent();
+                case 4 -> flag = false; // 메인 화면 이동
                 default -> {
                     System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
                     flag = false;
@@ -169,10 +173,15 @@ public class CampManagementApplication {
         System.out.println("\n수강생을 등록합니다...");
         System.out.print("수강생 이름 입력: ");
         String studentName = sc.next();
-        // 기능 구현 (필수 과목, 선택 과목)
 
-        Student student = new Student(sequence(INDEX_TYPE_STUDENT), studentName); // 수강생 인스턴스 생성 예시 코드
+        System.out.println("현재 상태를 입력해 주세요.");
+        System.out.println("좋음 :  Green / 안 좋음 : Red / 그저 그럼 : Yellow");
+        String studentFeeling = sc.next();
+
+
+        Student student = new Student(sequence(INDEX_TYPE_STUDENT), studentName, studentFeeling); // 수강생 인스턴스 생성 예시 코드
         // 기능 구현
+        studentStore.add(student);
         System.out.println("수강생 등록 성공!\n");
     }
 
@@ -180,7 +189,36 @@ public class CampManagementApplication {
     private static void inquireStudent() {
         System.out.println("\n수강생 목록을 조회합니다...");
         // 기능 구현
+        System.out.println("=========================");
+        System.out.println("수강생 번호 : 이름");
+        for (Student student : studentStore) {
+            System.out.println(student.getStudentId() + " : " + student.getStudentName());
+        }
         System.out.println("\n수강생 목록 조회 성공!");
+    }
+
+    private static void setStudent() {
+        System.out.println("수정할 수강생의 고유번호를 입력해주세요.");
+        String studentId = sc.next();
+        ArrayList<String> idList = (ArrayList<String>) studentStore.stream().map(Student::getStudentId).collect(Collectors.toList());
+
+        int index = 0;
+        for(int i=0; i<idList.size(); i++) {
+            if(studentId.equals(idList.get(i))) {
+                index = i;
+            }
+        }
+
+        System.out.println("수강생의 이름과 상태를 다시 입력해 주세요");
+        System.out.print("이름 : ");
+        String newName = sc.next();
+        System.out.print("\n상태(Green, Red, Yellow) : ");
+        String newFeeling = sc.next();
+
+        Student newStudent = new Student(studentId, newName, newFeeling);
+
+        studentStore.set(index, newStudent);
+
     }
 
     private static void displayScoreView() {
