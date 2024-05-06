@@ -22,7 +22,7 @@ public class Student {
     }
     public List<Subject> getMandatorySubjects() {return mandatorySubjects;}
     public List<Subject> getOptionalSubjects() {return optionalSubjects;}
-
+    //
     public void setMandatorySubjects(List<Subject> mandatorySubjects) {this.mandatorySubjects = mandatorySubjects;}
     public void setOptionalSubjects(List<Subject> optionalSubjects) {this.optionalSubjects = optionalSubjects;}
 }

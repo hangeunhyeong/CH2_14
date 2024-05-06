@@ -170,10 +170,11 @@ public class CampManagementApplication {
         student.setMandatorySubjects(mandatorySubjects);
         student.setOptionalSubjects(optionalSubjects);
 
-        Score score = new Score(studentId);
-        // score.setScoremap(student.getMandatorySubjects(), student.getOptionalSubjects());
+        Score score = new Score(studentId, student.getMandatorySubjects(), student.getOptionalSubjects());
+        score.initScoreMap();
 
         studentStore.add(student);
+        scoreStore.add(score);
         System.out.println("수강생 등록 성공!\n");
     }
 
@@ -256,7 +257,7 @@ public class CampManagementApplication {
     private static void inquireStudent() {
         System.out.println("\n수강생 목록을 조회합니다...");
         for (Student student : studentStore){
-            System.out.println("studentId : " + student.getStudentId() + "Name : " + student.getStudentName());
+            System.out.println("studentId : " + student.getStudentId() + " " + "Name : " + student.getStudentName());
         }
         System.out.println("\n수강생 목록 조회 성공!");
     }
@@ -293,27 +294,124 @@ public class CampManagementApplication {
 
     // 수강생의 과목별 시험 회차 및 점수 등록
     private static void createScore() {
-        String studentId = getStudentId(); // 관리할 수강생 고유 번호
+        String studentId;
+        Score targetScore;
+
+        do {
+            System.out.println("등록할 사용자의 ID를 입력하세요: ");
+            studentId = getStudentId();
+            String finalStudentId = studentId;
+            targetScore = scoreStore.stream()
+                    .filter(s -> s.getScoreId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetScore == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetScore == null);
+
         System.out.println("시험 점수를 등록합니다...");
-        // 기능 구현
+
+        String subjectId;
+        do {
+            System.out.println("과목 ID를 입력하세요: ");
+            subjectId = sc.next();
+
+        } while (!targetScore.isValidSubjectId(subjectId));
+
+        int round;
+        do {
+            System.out.println("회차를 입력하세요 (1~10): ");
+            round = sc.nextInt();
+        } while (round < 1 || round > 10);
+
+        int score;
+        do {
+            System.out.println("점수를 입력하세요 (0~100): ");
+            score = sc.nextInt();
+        } while (score < 0 || score > 100);
+
+        targetScore.registerScore(subjectId, round, score, "register");
         System.out.println("\n점수 등록 성공!");
     }
 
     // 수강생의 과목별 회차 점수 수정
     private static void updateRoundScoreBySubject() {
-        String studentId = getStudentId(); // 관리할 수강생 고유 번호
-        // 기능 구현 (수정할 과목 및 회차, 점수)
+        String studentId;
+        Score targetScore;
+
+        do {
+            System.out.println("수정할 사용자의 ID를 입력하세요: ");
+            studentId = getStudentId();
+            String finalStudentId = studentId;
+            targetScore = scoreStore.stream()
+                    .filter(s -> s.getScoreId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetScore == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetScore == null);
+
         System.out.println("시험 점수를 수정합니다...");
-        // 기능 구현
-        System.out.println("\n점수 수정 성공!");
+
+        String subjectId;
+        do {
+            System.out.println("과목 ID를 입력하세요: ");
+            subjectId = sc.next();
+
+        } while (!targetScore.isValidSubjectId(subjectId));
+
+        int round;
+        do {
+            System.out.println("수정할 회차를 입력하세요 (1~10): ");
+            round = sc.nextInt();
+        } while (round < 1 || round > 10);
+
+        int score;
+        do {
+            System.out.println("수정할 점수를 입력하세요 (0~100): ");
+            score = sc.nextInt();
+        } while (score < 0 || score > 100);
+
+        targetScore.registerScore(subjectId, round, score, "edit");
+        System.out.println("\n점수 수정 완료!");
     }
 
     // 수강생의 특정 과목 회차별 등급 조회
     private static void inquireRoundGradeBySubject() {
-        String studentId = getStudentId(); // 관리할 수강생 고유 번호
-        // 기능 구현 (조회할 특정 과목)
+        String studentId;
+        Score targetScore;
+
+        do {
+            System.out.println("사용자의 ID를 입력하세요: ");
+            studentId = getStudentId();
+            String finalStudentId = studentId;
+            targetScore = scoreStore.stream()
+                    .filter(s -> s.getScoreId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetScore == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetScore == null);
+
+        String subjectId;
+        do {
+            System.out.println("과목 ID를 입력하세요: ");
+            subjectId = sc.next();
+
+        } while (!targetScore.isValidSubjectId(subjectId));
+
         System.out.println("회차별 등급을 조회합니다...");
-        // 기능 구현
+        List<List<String>> scoreList = targetScore.getScoreMap().get(subjectId);
+        for (List<String> roundInfo : scoreList) {
+            String roundNumber = roundInfo.get(0); // 회차
+            String score = roundInfo.get(1); // 점수
+            String grade = roundInfo.get(2); // 등급
+
+            System.out.println("회차: " + roundNumber + ", 점수: " + score + ", 등급: " + grade);
+        }
         System.out.println("\n등급 조회 성공!");
     }
 
