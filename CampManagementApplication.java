@@ -324,6 +324,7 @@ public class CampManagementApplication {
         String studentDel = sc.next();
         String delName = deleteChk(studentDel);
 
+        System.out.println("delname : " + delName);
         boolean studentDeleted = false;
         for (Student student : students) {
             if (student.getStudentId().equals(studentDel)) {

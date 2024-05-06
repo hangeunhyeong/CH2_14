@@ -8,7 +8,6 @@ public class Student {
         this.studentId = seq;
         this.studentName = studentName;
     }
-
     // Getter
     public String getStudentId() {
         return studentId;

@@ -33,7 +33,6 @@ public class Score {
     public static String getStudentId() {
         return studentId;
     }
-
     public int getScore() {
         return score;
     }
