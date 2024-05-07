@@ -190,22 +190,32 @@ public class CampManagementApplication {
         System.out.println("\n수강생 목록을 조회합니다...");
         // 기능 구현
         System.out.println("=========================");
-        System.out.println("수강생 번호 : 이름");
+        System.out.println("고유번호 : 이름");
         for (Student student : studentStore) {
             System.out.println(student.getStudentId() + " : " + student.getStudentName());
         }
         System.out.println("\n수강생 목록 조회 성공!");
     }
 
+    // 수강생 정보 수정
     private static void setStudent() {
-        System.out.println("수정할 수강생의 고유번호를 입력해주세요.");
-        String studentId = sc.next();
-        ArrayList<String> idList = (ArrayList<String>) studentStore.stream().map(Student::getStudentId).collect(Collectors.toList());
+        String studentId = "";
+        int index;
+        Loop:
+        while(true) {
+            System.out.println("수정할 수강생의 고유번호를 입력해주세요.");
+            studentId = sc.next();
+            ArrayList<String> idList = (ArrayList<String>) studentStore.stream().map(Student::getStudentId).collect(Collectors.toList());
 
-        int index = 0;
-        for(int i=0; i<idList.size(); i++) {
-            if(studentId.equals(idList.get(i))) {
-                index = i;
+            index = -1;
+            for (int i = 0; i < idList.size(); i++) {
+                if (studentId.equals(idList.get(i))) {
+                    index = i;
+                    break Loop;
+                }
+            }
+            if (index == -1) {
+                System.out.println("입력한 고유번호와 일치하는 수강생이 존재하지 않습니다.");
             }
         }
 
