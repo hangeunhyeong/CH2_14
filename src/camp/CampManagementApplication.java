@@ -164,7 +164,6 @@ public class CampManagementApplication {
             }
         }
     }
-
     // 수강생 등록
     private static void createStudent() {
         System.out.println("\n수강생을 등록합니다...");
@@ -184,7 +183,6 @@ public class CampManagementApplication {
                 System.out.println("Green / Red / Yellow 중 입력해주세요.");
             }
         }
-
 
         List<Subject> mandatorySubjects = selectMandatorySubjects();
         List<Subject> optionalSubjects = selectOptionalSubjects();
@@ -352,7 +350,9 @@ public class CampManagementApplication {
             System.out.println("1. 수강생의 과목별 시험 회차 및 점수 등록");
             System.out.println("2. 수강생의 과목별 회차 점수 수정");
             System.out.println("3. 수강생의 특정 과목 회차별 등급 조회");
-            System.out.println("4. 메인 화면 이동");
+            System.out.println("4. 수강생의 과목별 평균 등급을 조회");
+            System.out.println("5. 특정 상태 수강생들의 필수 과목 평균 등급을 조회");
+            System.out.println("6. 메인 화면 이동");
             System.out.print("관리 항목을 선택하세요...");
             int input = sc.nextInt();
 
@@ -360,7 +360,9 @@ public class CampManagementApplication {
                 case 1 -> createScore(); // 수강생의 과목별 시험 회차 및 점수 등록
                 case 2 -> updateRoundScoreBySubject(); // 수강생의 과목별 회차 점수 수정
                 case 3 -> inquireRoundGradeBySubject(); // 수강생의 특정 과목 회차별 등급 조회
-                case 4 -> flag = false; // 메인 화면 이동
+                case 4 -> inquireAverageGradeBySubject();
+                // case 5 -> inquireMyMendatorySubjectAverage();
+                case 6 -> flag = false; // 메인 화면 이동
                 default -> {
                     System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
                     flag = false;
@@ -372,6 +374,88 @@ public class CampManagementApplication {
     private static String getStudentId() {
         System.out.print("\n관리할 수강생의 번호를 입력하시오...");
         return sc.next();
+    }
+
+    private static String getSubjectType(Student student, String subjectId) {
+        for (Subject subject : student.getMandatorySubjects()) {
+            if (subject.getSubjectId().equals(subjectId)) {
+                return "Mandatory";
+            }
+        }
+        for (Subject subject : student.getOptionalSubjects()) {
+            if (subject.getSubjectId().equals(subjectId)) {
+                return "Optional";
+            }
+        }
+        return null;
+    }
+
+    private static void inquireAverageGradeBySubject() {
+        String studentId;
+        Student targetStudent;
+        String subjectType;
+        String subjectId;
+        Score targetScore;
+
+        do {
+            System.out.print("사용자의 ID를 입력하세요: ");
+            studentId = getStudentId();
+            String finalStudentId = studentId;
+            targetStudent = studentStore.stream()
+                    .filter(s -> s.getStudentId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            targetScore = scoreStore.stream()
+                    .filter(s -> s.getScoreId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetStudent == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetStudent == null);
+
+        do {
+            System.out.print("과목ID를 입력하세요: ");
+            subjectId = sc.next();
+            subjectType = getSubjectType(targetStudent, subjectId);
+            if (subjectType == null) {
+                System.out.println("수강하지 않은 과목입니다.");
+            }
+        } while (subjectType == null);
+
+        List<List<String>> scoreList = targetScore.getScoreMap().get(subjectId);
+        int cnt = 0;
+        int totalScore = 0;
+        String averageGrade;
+        String subjectName = "";
+        for (List<String> roundInfo : scoreList) {
+            String score = roundInfo.get(1);
+            if (score != null){
+                cnt++;
+                totalScore += Integer.parseInt(score);
+            }
+        }
+        if (subjectType.equals("Mandatory")) {
+            averageGrade = Score.calculateMandatory(totalScore/cnt);
+            for (Subject subject : targetStudent.getMandatorySubjects()) {
+                if (subject.getSubjectId().equals(subjectId)) {
+                    subjectName = subject.getSubjectName();
+                    break;
+                }
+            }
+        }
+        else {
+            averageGrade = Score.calculateOptional(totalScore/cnt);
+            for (Subject subject : targetStudent.getOptionalSubjects()) {
+                if (subject.getSubjectId().equals(subjectId)) {
+                    subjectName = subject.getSubjectName();
+                    break;
+                }
+            }
+        }
+        System.out.println("수강생 이름 : " + targetStudent.getStudentName());
+        System.out.println("과목명 : " + subjectName);
+        System.out.println("평균 등급 : " + averageGrade);
     }
 
     // 수강생의 과목별 시험 회차 및 점수 등록
@@ -488,10 +572,9 @@ public class CampManagementApplication {
         System.out.println("회차별 등급을 조회합니다...");
         List<List<String>> scoreList = targetScore.getScoreMap().get(subjectId);
         for (List<String> roundInfo : scoreList) {
-            String roundNumber = roundInfo.get(0); // 회차
-            String score = roundInfo.get(1); // 점수
-            String grade = roundInfo.get(2); // 등급
-
+            String roundNumber = roundInfo.get(0);
+            String score = roundInfo.get(1);
+            String grade = roundInfo.get(2);
             System.out.println("회차: " + roundNumber + ", 점수: " + score + ", 등급: " + grade);
         }
         System.out.println("\n등급 조회 성공!");

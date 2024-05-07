@@ -86,7 +86,7 @@ public class Score {
 
     }
 
-    private static String calculateMandatory(int score) {
+    public static String calculateMandatory(int score) {
         if (score >= 95) {
             return "A";
         } else if (score >= 90) {
@@ -102,7 +102,7 @@ public class Score {
         }
     }
 
-    private static String calculateOptional(int score) {
+    public static String calculateOptional(int score) {
         if (score >= 90) {
             return "A";
         } else if (score >= 80) {
