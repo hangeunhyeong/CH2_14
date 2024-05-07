@@ -177,12 +177,9 @@ public class CampManagementApplication {
 
         Student student = new Student(sequence(INDEX_TYPE_STUDENT), studentName);
         students.add(student);
-        studentStore.add(student);
 
 
         System.out.println("student: " + student.getStudentName());
-        System.out.println("studentStore:");
-
 
         System.out.println("수강생 등록 성공!\n");
     }
@@ -200,7 +197,7 @@ public class CampManagementApplication {
 
     }
 
-    private static String deleteChk(String studentId){
+    private static String getStudentName(String studentId){
         String studentName ="";
         for (Student student : students) {
             if (student.getStudentId().equals(studentId)) {
@@ -322,27 +319,16 @@ public class CampManagementApplication {
         System.out.println("\n수강생 및 점수 삭제를 시작합니다...");
         System.out.print("삭제할 수강생의 학번을 입력하세요: ");
         String studentDel = sc.next();
-        String delName = deleteChk(studentDel);
-
-        System.out.println("delname : " + delName);
-        boolean studentDeleted = false;
         for (Student student : students) {
             if (student.getStudentId().equals(studentDel)) {
+                System.out.println("delname : " + student.getStudentName());
                 students.remove(student);
-                studentDeleted = true;
-                break;
+                scoreStore.removeIf(score -> score.getStudentId().equals(studentDel));
+                System.out.println("수강생 및 점수 삭제가 완료되었습니다.");
+                return;
             }
         }
-        if (studentDeleted) {
-            // 삭제된 학생에 해당하는 점수 정보도 삭제
-            scoreStore.removeIf(score -> score.getStudentId().equals(studentDel));
-            System.out.println("수강생 및 점수 삭제가 완료되었습니다.");
-        } else {
-            System.out.println("입력한 학번과 일치하는 수강생이 없습니다.");
-        }
-
-
-
+        System.out.println("입력한 학번과 일치하는 수강생이 없습니다.");
     }
 }
 

@@ -5,7 +5,7 @@ import java.util.Scanner;
 public class Score {
     private String scoreId;
     public String subjectId;
-    public static String studentId;
+    public String studentId;
     public int score;
 
 
@@ -30,7 +30,7 @@ public class Score {
     }
 
 
-    public static String getStudentId() {
+    public String getStudentId() {
         return studentId;
     }
     public int getScore() {
