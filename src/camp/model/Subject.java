@@ -24,4 +24,5 @@ public class Subject {
         return subjectType;
     }
 
+
 }
