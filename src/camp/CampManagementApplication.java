@@ -141,14 +141,22 @@ public class CampManagementApplication {
             System.out.println("수강생 관리 실행 중...");
             System.out.println("1. 수강생 등록");
             System.out.println("2. 수강생 목록 조회");
-            System.out.println("3. 메인 화면 이동");
+            System.out.println("3. 수강생 정보 조회");
+            System.out.println("4. 수강생 정보 수정");
+            System.out.println("5. 상태별 수강생 조회");
+            System.out.println("6. 수강생 삭제");
+            System.out.println("7. 메인 화면 이동");
             System.out.print("관리 항목을 선택하세요...");
             int input = sc.nextInt();
 
             switch (input) {
                 case 1 -> createStudent(); // 수강생 등록
                 case 2 -> inquireStudent(); // 수강생 목록 조회
-                case 3 -> flag = false; // 메인 화면 이동
+                case 3 -> studentInfo();
+                case 4 -> editStudent();
+                case 5 -> studentPerStatus();
+                case 6 -> deleteStudentAndScore();
+                case 7 -> flag = false; // 메인 화면 이동
                 default -> {
                     System.out.println("잘못된 입력입니다.\n메인 화면 이동...");
                     flag = false;
@@ -162,11 +170,27 @@ public class CampManagementApplication {
         System.out.println("\n수강생을 등록합니다...");
         System.out.print("수강생 이름 입력: ");
         String studentName = sc.next();
+
+        System.out.println("현재 상태를 입력해 주세요.");
+        System.out.println("좋음 :  Green / 안 좋음 : Red / 그저 그럼 : Yellow");
+        String studentFeeling = "";
+        boolean flag = false;
+        while (!flag) {
+            System.out.print("\n상태(Green, Red, Yellow) : ");
+            studentFeeling = sc.next();
+            if (studentFeeling.equals("Yellow") || studentFeeling.equals("Red") || studentFeeling.equals("Green")) {
+                flag = true;
+            } else {
+                System.out.println("Green / Red / Yellow 중 입력해주세요.");
+            }
+        }
+
+
         List<Subject> mandatorySubjects = selectMandatorySubjects();
         List<Subject> optionalSubjects = selectOptionalSubjects();
         String studentId = sequence(INDEX_TYPE_STUDENT);
 
-        Student student = new Student(studentId, studentName);
+        Student student = new Student(studentId, studentName, studentFeeling);
         student.setMandatorySubjects(mandatorySubjects);
         student.setOptionalSubjects(optionalSubjects);
 
@@ -257,9 +281,67 @@ public class CampManagementApplication {
     private static void inquireStudent() {
         System.out.println("\n수강생 목록을 조회합니다...");
         for (Student student : studentStore){
-            System.out.println("studentId : " + student.getStudentId() + " " + "Name : " + student.getStudentName());
+            System.out.println("studentId : " + student.getStudentId()  + " Name : " + student.getStudentName());
         }
         System.out.println("\n수강생 목록 조회 성공!");
+
+    }
+
+    private static void studentInfo() {
+        String studentId;
+        Student targetStudent;
+
+        do {
+            System.out.println("조회할 사용자의 ID를 입력하세요: ");
+            studentId = getStudentId();
+            String finalStudentId = studentId;
+            targetStudent = studentStore.stream()
+                    .filter(s -> s.getStudentId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetStudent == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetStudent == null);
+
+        System.out.println("고유번호 : " + targetStudent.getStudentId());
+        System.out.println("이름 : " + targetStudent.getStudentName());
+        System.out.println("상태 : " + targetStudent.getStudentFeeling());
+        System.out.println("선택한 과목명 : " + targetStudent.getSubjects());
+    }
+
+    private static void editStudent() {
+        String studentId;
+        Student targetStudent;
+
+        do {
+            System.out.println("수정할 사용자의 ID를 입력하세요: ");
+            studentId = getStudentId();
+            String finalStudentId = studentId;
+            targetStudent = studentStore.stream()
+                    .filter(s -> s.getStudentId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetStudent == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetStudent == null);
+
+        System.out.print("이름 : ");
+        String newName = sc.next();
+
+        String newFeeling = "";
+        boolean flag = false;
+        while (!flag) {
+            System.out.print("\n상태(Green, Red, Yellow) : ");
+            newFeeling = sc.next();
+            if (newFeeling.equals("Yellow") || newFeeling.equals("Red") || newFeeling.equals("Green")) {
+                flag = true;
+            } else {
+                System.out.println("Green / Red / Yellow 중 입력해주세요.");
+            }
+        }
+        targetStudent.editStudentInfo(newName, newFeeling);
     }
 
     private static void displayScoreView() {
@@ -413,6 +495,65 @@ public class CampManagementApplication {
             System.out.println("회차: " + roundNumber + ", 점수: " + score + ", 등급: " + grade);
         }
         System.out.println("\n등급 조회 성공!");
+    }
+
+    private static void studentPerStatus(){
+        List<Student> targetStudents = new ArrayList<>();
+        System.out.println("학생들의 상태(Green, Red, Yellow)별 조회를 시작합니다.");
+        System.out.println("조회할 상태를 입력하세요 (Green, Red, Yellow): ");
+        String status = "";
+        boolean flag = false;
+        while (!flag) {
+            System.out.print("\n상태(Green, Red, Yellow) : ");
+            status = sc.next();
+            if (status.equals("Yellow") || status.equals("Red") || status.equals("Green")) {
+                flag = true;
+            } else {
+                System.out.println("Green / Red / Yellow 중 입력해주세요.");
+            }
+        }
+
+        for (Student student : studentStore) {
+            if (student.getStudentFeeling().equals(status)) {
+                targetStudents.add(student);
+            }
+        }
+        if (targetStudents.isEmpty()) {
+            System.out.println("해당 상태의 학생이 없습니다.");
+        } else {
+            System.out.println("조회된 학생들의 정보:");
+            for (Student student : targetStudents) {
+                System.out.println("studentId: " + student.getStudentId() + ", studentName: " + student.getStudentName());
+            }
+        }
+    }
+
+    private static void deleteStudentAndScore() {
+        String studentId;
+        Student targetStudent;
+        Score targetScore;
+
+        do {
+            System.out.println("삭제할 사용자의 ID를 입력하세요: ");
+            studentId = getStudentId();
+            final String finalStudentId = studentId;
+            targetStudent = studentStore.stream()
+                    .filter(s -> s.getStudentId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            targetScore = scoreStore.stream()
+                    .filter(score -> score.getScoreId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetStudent == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetStudent == null);
+
+        if (targetScore != null) {scoreStore.remove(targetScore);}
+        else {System.out.println("삭제할 점수가 없습니다.");}
+        studentStore.remove(targetStudent);
+        System.out.println("수강생 및 점수 삭제가 완료되었습니다.");
     }
 
 }
