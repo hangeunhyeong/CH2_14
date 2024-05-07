@@ -197,17 +197,6 @@ public class CampManagementApplication {
 
     }
 
-    private static String getStudentName(String studentId){
-        String studentName ="";
-        for (Student student : students) {
-            if (student.getStudentId().equals(studentId)) {
-                studentName = student.getStudentName(); // 해당 학번에 해당하는 학생의 이름을 가져옴
-                break;
-            }
-        }
-        return studentName;
-    }
-
     private static void displayScoreView() {
         boolean flag = true;
         while (flag) {
@@ -323,7 +312,9 @@ public class CampManagementApplication {
             if (student.getStudentId().equals(studentDel)) {
                 System.out.println("delname : " + student.getStudentName());
                 students.remove(student);
+                System.out.println("score 11 :" + scoreStore);
                 scoreStore.removeIf(score -> score.getStudentId().equals(studentDel));
+                System.out.println("score :" + scoreStore);
                 System.out.println("수강생 및 점수 삭제가 완료되었습니다.");
                 return;
             }
