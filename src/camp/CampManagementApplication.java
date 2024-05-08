@@ -397,11 +397,11 @@ public class CampManagementApplication {
             }
         }
 
-        for (Subject subject : subjectStore) {//학생이 수강하고 있는 강의를 먼저 알아야함
-            if (subjectType.equals(subject.getSubjectType())) {
-                System.out.println("필수과목 목록: " + subject.getSubjectName());
-            }
-        }
+//        for (Subject subject : subjectStore) {
+//            if (subjectType.equals(subject.getSubjectType())) {
+//                System.out.println("필수과목 목록: " + subject.getSubjectName());
+//            }
+//        }
 
         //학생이 수강하고 있는 필수 과목들 점수 합
         for (Score score : scoreStore) {
