@@ -251,18 +251,40 @@ public class CampManagementApplication {
         int round = sc.nextInt();
         System.out.print("점수를 입력해주세요 : ");
         double sujectscore = sc.nextDouble();
-        String rank;
-        if (sujectscore <= 100 && sujectscore >= 95) {
-            rank = "A";
-        } else if (sujectscore <= 94 && sujectscore >= 90) {
-            rank = "B";
-        } else if (sujectscore <= 89 && sujectscore >= 80) {
-            rank = "C";
-        } else if (sujectscore <= 79 && sujectscore >= 70) {
-            rank = "D";
-        } else {
-            rank = "F";
+        String subjectType="MANDATORY";
+        for(Subject subject : subjectStore) {
+            if (subjectId.equals(subject.getSubjectId())&&!subject.getSubjectType().equals("MANDATORY")) {
+                subjectType=subject.getSubjectType();
+            }
         }
+        String rank = "";
+        if(subjectType.equals("MANDATORY")){
+            if (sujectscore <= 100 && sujectscore >= 95) {
+                rank = "A";
+            } else if (sujectscore <= 94 && sujectscore >= 90) {
+                rank = "B";
+            } else if (sujectscore <= 89 && sujectscore >= 80) {
+                rank = "C";
+            } else if (sujectscore <= 79 && sujectscore >= 70) {
+                rank = "D";
+            } else {
+                rank = "F";
+            }
+        }
+        else if(subjectType.equals("CHOICE")){
+            if (sujectscore <= 100 && sujectscore >= 90) {
+                rank = "A";
+            } else if (sujectscore <= 89 && sujectscore >= 80) {
+                rank = "B";
+            } else if (sujectscore <= 79 && sujectscore >= 70) {
+                rank = "C";
+            } else if (sujectscore <= 69 && sujectscore >= 60) {
+                rank = "D";
+            } else {
+                rank = "F";
+            }
+        }
+
         System.out.println("시험 점수를 등록합니다...");
         // 기능 구현
         Score score = new Score(scoreId, subjectId, studentId, round, sujectscore, rank);
@@ -308,62 +330,90 @@ public class CampManagementApplication {
                 System.out.println("과목명: " + subject.getSubjectName());
             }
         }
+        String subjectType="MANDATORY";
+        for(Subject subject : subjectStore) {
+            if (subjectId.equals(subject.getSubjectId())&&!subject.getSubjectType().equals("MANDATORY")) {
+                subjectType=subject.getSubjectType();
+            }
+        }
+
         double temp = 0;
         int denominator = 0;
 
         for (Score score : scoreStore) {
             if (studentId.equals(score.getStudentId()) && subjectId.equals(score.getSubjectId())) {
-
                 denominator += 1;
                 temp += score.getScore();
-
             }
         }
+        //subjectType 값에 따라 등급을 다르게 내고 싶다
         double average = temp / denominator;
         String rank;
-        if (average <= 100 && average >= 95) {
-            rank = "A";
-        } else if (average <= 94 && average >= 90) {
-            rank = "B";
-        } else if (average <= 89 && average >= 80) {
-            rank = "C";
-        } else if (average <= 79 && average >= 70) {
-            rank = "D";
-        } else {
-            rank = "F";
+        if (subjectType.equals("MANDATORY")) {
+            if (average <= 100 && average >= 95) {
+                rank = "A";
+            } else if (average <= 94 && average >= 90) {
+                rank = "B";
+            } else if (average <= 89 && average >= 80) {
+                rank = "C";
+            } else if (average <= 79 && average >= 70) {
+                rank = "D";
+            } else {
+                rank = "F";
+            }
+            System.out.println("평균 등급: " + rank);
+        } else if (subjectType.equals("CHOICE")) {
+            if (average <= 100 && average >= 90) {
+                rank = "A";
+            } else if (average <= 89 && average >= 80) {
+                rank = "B";
+            } else if (average <= 79 && average >= 70) {
+                rank = "C";
+            } else if (average <= 69 && average >= 60) {
+                rank = "D";
+            } else {
+                rank = "F";
+            }
+            System.out.println("평균 등급: " + rank);
         }
 
-        System.out.println("평균 등급: " + rank);
         // 기능 구현
         System.out.println("\n등급 조회 성공!");
     }
 
     //특정 상태 수강생들의 필수 과목 평균 등급을 조회
     //회차는 어떻게 해야하나
-    //
     private static void inquireMyMendatorySubjectAverage() {
         String studentId = getStudentId(); // 관리할 수강생 고유 번호
         // 기능 구현 (조회할 필수 과목)
-        System.out.print("과목ID를 입력하세요: ");
         String subjectType = "MANDATORY";
         // 기능 구현
         double temp = 0;
         int denominator = 0;
-
-        for (Student student : studentStore) {
+        //한 학생이 수강하고 있는 필수과목들의 평균 등급
+        for (Student student : studentStore) {//특정 상태 대신 일단 학생ID로
             if (studentId.equals(student.getStudentId())) {
                 System.out.println("학생이름: " + student.getStudentName());
             }
         }
-        for (Subject subject : subjectStore) {
+
+        for (Subject subject : subjectStore) {//학생이 수강하고 있는 강의를 먼저 알아야함
             if (subjectType.equals(subject.getSubjectType())) {
-                System.out.println("수강하고 있는 필수과목: " + subject.getSubjectName());
+                System.out.println("필수과목 목록: " + subject.getSubjectName());
             }
         }
+
+        //학생이 수강하고 있는 필수 과목들 점수 합
         for (Score score : scoreStore) {
             if (studentId.equals(score.getStudentId())) {
-                denominator += 1;
-                temp += score.getScore();
+                String subjectId = score.getSubjectId();
+                for (Subject subject : subjectStore) {
+                    if (subjectId.equals(subject.getSubjectId()) && subjectType.equals(subject.getSubjectType())) {
+                        denominator += 1;
+                        temp += score.getScore();
+                        System.out.println(temp);
+                    }
+                }
             }
         }
 
