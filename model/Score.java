@@ -43,6 +43,7 @@ public class Score {
         initScoreMapForSubjects(this.optionalSubjects);
     }
 
+    //점수표 초기화
     private void initScoreMapForSubjects(List<Subject> subjects) {
         for (Subject subject : subjects) {
             List<List<String>> scores = new ArrayList<>();
