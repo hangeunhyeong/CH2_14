@@ -24,6 +24,21 @@ public class Score {
         return scoreMap;
     }
 
+    public List<String> getSubjects() {
+        List<String> subjectIndex = new ArrayList<>();;
+        for (Subject subject : mandatorySubjects) {
+            String subjectId = subject.getSubjectId();
+            String subjectName = subject.getSubjectName();
+            subjectIndex.add(subjectId + " : " + subjectName);
+        }
+        for (Subject subject : optionalSubjects) {
+            String subjectId = subject.getSubjectId();
+            String subjectName = subject.getSubjectName();
+            subjectIndex.add(subjectId + " : " + subjectName);
+        }
+        return  subjectIndex;
+    }
+
     public boolean isValidSubjectId(String subjectId) {
         for (Subject subject : mandatorySubjects) {
             if (subject.getSubjectId().equals(subjectId)) {
@@ -57,7 +72,7 @@ public class Score {
         }
     }
 
-    public void registerScore(String subjectid, int round, int score, String flag) {
+    public boolean registerScore(String subjectid, int round, int score, String flag) {
         String type = "Optional";
         List<List<String>> scores = scoreMap.get(subjectid);
         List<String> roundScores = scores.get(round - 1);
@@ -69,10 +84,11 @@ public class Score {
             }
         }
 
+        // 등록시 이미 점수가 존재하는 경우
         if (roundScores.get(1) != null && Objects.equals(flag, "register")) {
             System.out.println("이미 점수가 등록되었습니다.");
         } else if (roundScores.get(1) == null && Objects.equals(flag, "edit")) {
-            System.out.println("등록된 점수가 없습니다.");
+            System.out.println("등록된 점수가 없습니다.");    // 수정시 이전에 등록된 점수가 없는 경우
         } else {
             roundScores.set(1, String.valueOf(score));
             String grade;
@@ -82,10 +98,12 @@ public class Score {
                 grade = calculateOptional(score);
             }
             roundScores.set(2, grade);
+            return true;
         }
-
+        return false;
     }
 
+    // 필수과목 등급
     public static String calculateMandatory(int score) {
         if (score >= 95) {
             return "A";
@@ -101,7 +119,7 @@ public class Score {
             return "N";
         }
     }
-
+    // 선택과목 등급
     public static String calculateOptional(int score) {
         if (score >= 90) {
             return "A";
