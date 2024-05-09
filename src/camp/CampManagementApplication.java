@@ -251,14 +251,14 @@ public class CampManagementApplication {
         int round = sc.nextInt();
         System.out.print("점수를 입력해주세요 : ");
         double sujectscore = sc.nextDouble();
-        String subjectType="MANDATORY";
-        for(Subject subject : subjectStore) {
-            if (subjectId.equals(subject.getSubjectId())&&!subject.getSubjectType().equals("MANDATORY")) {
-                subjectType=subject.getSubjectType();
+        String subjectType = "MANDATORY";
+        for (Subject subject : subjectStore) {
+            if (subjectId.equals(subject.getSubjectId()) && !subject.getSubjectType().equals("MANDATORY")) {
+                subjectType = subject.getSubjectType();
             }
         }
         String rank = "";
-        if(subjectType.equals("MANDATORY")){
+        if (subjectType.equals("MANDATORY")) {
             if (sujectscore <= 100 && sujectscore >= 95) {
                 rank = "A";
             } else if (sujectscore <= 94 && sujectscore >= 90) {
@@ -270,8 +270,7 @@ public class CampManagementApplication {
             } else {
                 rank = "F";
             }
-        }
-        else if(subjectType.equals("CHOICE")){
+        } else if (subjectType.equals("CHOICE")) {
             if (sujectscore <= 100 && sujectscore >= 90) {
                 rank = "A";
             } else if (sujectscore <= 89 && sujectscore >= 80) {
@@ -325,30 +324,39 @@ public class CampManagementApplication {
         // 기능 구현 (조회할 특정 과목)
         System.out.print("과목ID를 입력하세요: ");
         String subjectId = sc.next();
+        //subjectStore의 자료를 전부 하나하나 suject 변수에 넣을때까지 반복
         for (Subject subject : subjectStore) {
             if (subjectId.equals(subject.getSubjectId())) {
+                //입력한 subjectId와 받은 getSubjectId가 같으면 SubjectName 출력
                 System.out.println("과목명: " + subject.getSubjectName());
             }
         }
-        String subjectType="MANDATORY";
-        for(Subject subject : subjectStore) {
-            if (subjectId.equals(subject.getSubjectId())&&!subject.getSubjectType().equals("MANDATORY")) {
-                subjectType=subject.getSubjectType();
+
+
+        //subjectStore의 자료를 전부 하나하나 suject 변수에 넣을때까지 반복
+        String subjectType = "MANDATORY";
+        for (Subject subject : subjectStore) {
+            if (subjectId.equals(subject.getSubjectId()) && !subject.getSubjectType().equals("MANDATORY")) {
+                //입력한 subjectId와 받을 subjectId가 같고 받은 SubjectType이 MANDATORY가 아니면 subjectType(지역변수)에 받은 SubjectType 반환
+                subjectType = subject.getSubjectType();
             }
         }
 
         double temp = 0;
         int denominator = 0;
-
+        //scoreStore 자료를 전부 하나하나 score 변수에 넣을때까지 반복
         for (Score score : scoreStore) {
             if (studentId.equals(score.getStudentId()) && subjectId.equals(score.getSubjectId())) {
+                //입력한 studentId와 받을 StudentId가 같고 입력한 subjectId와 받을 subjectId가 같으면 denominator에 1씩 더해주고 temp에 반환받을 Score값을 계속 더해준다
                 denominator += 1;
                 temp += score.getScore();
             }
         }
-        //subjectType 값에 따라 등급을 다르게 내고 싶다
+
+        //subjectType 값에 따라 등급을 다르게 낸다
         double average = temp / denominator;
         String rank;
+        //subjectType이 MANDATORY일 때 평균에 맞춰 등급을 낸다
         if (subjectType.equals("MANDATORY")) {
             if (average <= 100 && average >= 95) {
                 rank = "A";
@@ -362,7 +370,9 @@ public class CampManagementApplication {
                 rank = "F";
             }
             System.out.println("평균 등급: " + rank);
-        } else if (subjectType.equals("CHOICE")) {
+        }
+        //subjectType이 CHOICE일 때 평균에 맞춰 등급을 낸다
+        else if (subjectType.equals("CHOICE")) {
             if (average <= 100 && average >= 90) {
                 rank = "A";
             } else if (average <= 89 && average >= 80) {
@@ -377,12 +387,10 @@ public class CampManagementApplication {
             System.out.println("평균 등급: " + rank);
         }
 
-        // 기능 구현
         System.out.println("\n등급 조회 성공!");
     }
 
     //특정 상태 수강생들의 필수 과목 평균 등급을 조회
-    //회차는 어떻게 해야하나
     private static void inquireMyMendatorySubjectAverage() {
         String studentId = getStudentId(); // 관리할 수강생 고유 번호
         // 기능 구현 (조회할 필수 과목)
@@ -390,9 +398,14 @@ public class CampManagementApplication {
         // 기능 구현
         double temp = 0;
         int denominator = 0;
+
         //한 학생이 수강하고 있는 필수과목들의 평균 등급
-        for (Student student : studentStore) {//특정 상태 대신 일단 학생ID로
+        //studentStore의 자료를 전부 하나하나 student 변수에 넣을때까지 반복
+        for (Student student : studentStore) {
             if (studentId.equals(student.getStudentId())) {
+                //특정 상태 대신 일단 학생ID로 이걸 상태로 바꿔서 생각하면 됨
+                //입력받은 studentId와 반환받은 studentId가 같으면 student.getStudentName() 반환값 출력
+                //상태로 생각하면 입력받은 상태와 반환받은 상태가 같으면 student.getStudentName() 반환값 출력
                 System.out.println("학생이름: " + student.getStudentName());
             }
         }
@@ -404,20 +417,24 @@ public class CampManagementApplication {
 //        }
 
         //학생이 수강하고 있는 필수 과목들 점수 합
+        //scoreStore 자료를 전부 하나하나 score 변수에 넣을때까지 반복
         for (Score score : scoreStore) {
+            //입력받은 studentId와 반환받은 studentId가 같으면 subjectId에 score.getSubjectId()의 값 반환
             if (studentId.equals(score.getStudentId())) {
                 String subjectId = score.getSubjectId();
+                //subjectStore 자료를 전부 하나하나 subject 변수에 넣을때까지 반복
                 for (Subject subject : subjectStore) {
                     if (subjectId.equals(subject.getSubjectId()) && subjectType.equals(subject.getSubjectType())) {
+                        //subjectId와 반환받은 subjectId가 같고 subjectType(지역변수)과 반환받은 subjectType이 같으면 denominator에 1을 더해주고 temp에 score.getScore()의 반환값을 더해준다
                         denominator += 1;
                         temp += score.getScore();
-                        System.out.println(temp);
+                        //System.out.println(temp);
                     }
                 }
             }
         }
 
-
+        //반환값의 합을 받은 temp를 denominator의 값으로 나누고 평균에 맞춰 필수과목의 등급을 구한다
         double average = temp / denominator;
         String rank;
         if (average <= 100 && average >= 95) {
