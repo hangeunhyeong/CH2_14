@@ -1,8 +1,6 @@
-package camp;
-
-import camp.model.Score;
-import camp.model.Student;
-import camp.model.Subject;
+import model.Score;
+import model.Student;
+import model.Subject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -165,21 +163,13 @@ public class CampManagementApplication {
         }
     }
 
-    // 수강생 등록
-    private static void createStudent() {
-        System.out.println("\n수강생을 등록합니다...");
-        System.out.print("수강생 이름 입력: ");
-        String studentName = sc.next();
-
-        System.out.println("현재 상태를 입력해 주세요.");
-        System.out.println("좋음 :  Green / 안 좋음 : Red / 그저 그럼 : Yellow");
+    private static String setStatus(){
         String studentFeeling = "";
-
         /* (Green, GREEN, green, G, g) 입력시 studentFeeling = "Green"
-        *  (Yellow, YELLOW, yellow, Y, y) 입력시 studentFeeling = "Yellow"
-        *  (Red, RED, red, R, r) 입력시 studentFeeling = "Red"
-        *  이외의 값 입력시 재입력
-        */
+         *  (Yellow, YELLOW, yellow, Y, y) 입력시 studentFeeling = "Yellow"
+         *  (Red, RED, red, R, r) 입력시 studentFeeling = "Red"
+         *  이외의 값 입력시 재입력
+         */
         boolean flag = false;
         while (!flag) {
             System.out.print("\n상태(Green, Red, Yellow) : ");
@@ -198,6 +188,46 @@ public class CampManagementApplication {
                 System.out.println("Green / Red / Yellow 중 입력해주세요.");
             }
         }
+        return studentFeeling;
+    }
+
+    private static Student identifyStudent(String flag) {
+        String studentId;
+        Student targetStudent;
+        do {
+            if (flag.equalsIgnoreCase("delete")) {System.out.println("삭제할 사용자의 ID를 입력하세요: ");}
+            else if (flag.equalsIgnoreCase("edit")) {System.out.println("수정할 사용자의 ID를 입력하세요: ");}
+            else {System.out.print("사용자의 ID를 입력하세요: ");}
+
+            studentId = getStudentId();
+            String finalStudentId = studentId;
+            targetStudent = studentStore.stream()
+                    .filter(s -> s.getStudentId().equals(finalStudentId))
+                    .findFirst()
+                    .orElse(null);
+            if (targetStudent == null) {
+                System.out.println("등록되지 않은 사용자입니다.");
+            }
+        } while (targetStudent == null);
+        return targetStudent;
+    }
+
+    private static Score identifyScore(String studentId) {
+        return scoreStore.stream()
+                .filter(s -> s.getScoreId().equals(studentId))
+                .findFirst()
+                .orElse(null);
+    }
+
+    // 수강생 등록
+    private static void createStudent() {
+        System.out.println("\n수강생을 등록합니다...");
+        System.out.print("수강생 이름 입력: ");
+        String studentName = sc.next();
+
+        System.out.println("현재 상태를 입력해 주세요.");
+        System.out.println("좋음 :  Green / 안 좋음 : Red / 그저 그럼 : Yellow");
+        String studentFeeling = setStatus();
 
         List<Subject> mandatorySubjects = selectMandatorySubjects();
         List<Subject> optionalSubjects = selectOptionalSubjects();
@@ -343,6 +373,7 @@ public class CampManagementApplication {
                 System.out.print("이전 화면으로 돌아가시겠습니까? (Y/N)");
                 cmd = sc.next();
                 if (cmd.equalsIgnoreCase("y")) {break;}
+                else {cnt = 0;}
             }
         } while (targetStudent == null);
 
@@ -355,44 +386,12 @@ public class CampManagementApplication {
     }
 
     private static void editStudent() {
-        String studentId;
         Student targetStudent;
 
-        do {
-            System.out.println("수정할 사용자의 ID를 입력하세요: ");
-            studentId = getStudentId();
-            String finalStudentId = studentId;
-            targetStudent = studentStore.stream()
-                    .filter(s -> s.getStudentId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            if (targetStudent == null) {
-                System.out.println("등록되지 않은 사용자입니다.");
-            }
-        } while (targetStudent == null);
-
+        targetStudent = identifyStudent("edit");
         System.out.print("이름 : ");
         String newName = sc.next();
-
-        String newFeeling = "";
-        boolean flag = false;
-        while (!flag) {
-            System.out.print("\n상태(Green, Red, Yellow) : ");
-            newFeeling = sc.next();
-            if (newFeeling.equalsIgnoreCase("Green") || newFeeling.equalsIgnoreCase("G")) {
-                newFeeling = "Green";
-                flag = true;
-            }
-            else if (newFeeling.equalsIgnoreCase("Yellow") || newFeeling.equalsIgnoreCase("Y")) {
-                newFeeling = "Yellow";
-                flag = true;
-            } else if (newFeeling.equalsIgnoreCase("Red") || newFeeling.equalsIgnoreCase("R")) {
-                newFeeling = "Red";
-                flag = true;
-            } else {
-                System.out.println("Green / Red / Yellow 중 입력해주세요.");
-            }
-        }
+        String newFeeling = setStatus();
         targetStudent.editStudentInfo(newName, newFeeling);
     }
 
@@ -426,12 +425,10 @@ public class CampManagementApplication {
     }
 
     private static String getStudentId() {
-        System.out.print("\n관리할 수강생의 번호를 입력하시오...");
         return sc.next();
     }
 
     private static void inquireAverageGradeBySubject() {
-        String studentId;
         Student targetStudent;
         Score targetScore;
         String averageGrade;
@@ -439,24 +436,8 @@ public class CampManagementApplication {
         int cnt;
         int totalScore;
 
-        // 유효한 사용자 판별
-        do {
-            System.out.print("사용자의 ID를 입력하세요: ");
-            studentId = getStudentId();
-            String finalStudentId = studentId;
-            targetStudent = studentStore.stream()
-                    .filter(s -> s.getStudentId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            targetScore = scoreStore.stream()
-                    .filter(s -> s.getScoreId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            if (targetStudent == null) {
-                System.out.println("등록되지 않은 사용자입니다.");
-            }
-        } while (targetStudent == null);
-
+        targetStudent = identifyStudent("inquire");
+        targetScore = identifyScore(targetStudent.getStudentId());
         System.out.println("수강생 이름 : " + targetStudent.getStudentName());
 
         // 수강생이 수강한 필수 과목에 대한 평균 등급 출력
@@ -477,6 +458,7 @@ public class CampManagementApplication {
             averageGrade = Score.calculateMandatory(totalScore / cnt);
             System.out.println("과목 이름 : " + subjectName);
             System.out.println("평균 등급 : " + averageGrade);
+            System.out.println();
         }
 
         // 수강생이 수강한 선택 과목에 대한 평균 등급 출력
@@ -497,6 +479,7 @@ public class CampManagementApplication {
             averageGrade = Score.calculateOptional(totalScore / cnt);
             System.out.println("과목 이름 : " + subjectName);
             System.out.println("평균 등급 : " + averageGrade);
+            System.out.println();
         }
     }
 
@@ -504,30 +487,7 @@ public class CampManagementApplication {
         List<Student> targetStudents = new ArrayList<>();
         System.out.println("특정 상태 수강생들의 필수 과목 평균 등급을 조회합니다.");
         System.out.println("조회할 상태를 입력하세요 (Green, Red, Yellow): ");
-        String studentFeeling = "";
-        /* (Green, GREEN, green, G, g) 입력시 studentFeeling = "Green"
-         *  (Yellow, YELLOW, yellow, Y, y) 입력시 studentFeeling = "Yellow"
-         *  (Red, RED, red, R, r) 입력시 studentFeeling = "Red"
-         *  이외의 값 입력시 재입력
-         */
-        boolean flag = false;
-        while (!flag) {
-            System.out.print("\n상태(Green, Red, Yellow) : ");
-            studentFeeling = sc.next();
-            if (studentFeeling.equalsIgnoreCase("Green") || studentFeeling.equalsIgnoreCase("G")) {
-                studentFeeling = "Green";
-                flag = true;
-            }
-            else if (studentFeeling.equalsIgnoreCase("Yellow") || studentFeeling.equalsIgnoreCase("Y")) {
-                studentFeeling = "Yellow";
-                flag = true;
-            } else if (studentFeeling.equalsIgnoreCase("Red") || studentFeeling.equalsIgnoreCase("R")) {
-                studentFeeling = "Red";
-                flag = true;
-            } else {
-                System.out.println("Green / Red / Yellow 중 입력해주세요.");
-            }
-        }
+        String studentFeeling = setStatus();
 
         for (Student student : studentStore) {
             if (student.getStudentFeeling().equals(studentFeeling)) {
@@ -546,7 +506,7 @@ public class CampManagementApplication {
                             .filter(score -> score.getScoreId().equals(student.getStudentId()))
                             .findFirst()
                             .orElse(null);
-                    if (studentScore != null && studentScore.getScoreMap().containsKey(subjectId)) {
+                    if (studentScore != null) {
                         List<List<String>> scores = studentScore.getScoreMap().get(subjectId);
                         for (List<String> roundInfo : scores) {
                             String score = roundInfo.get(1);
@@ -566,21 +526,13 @@ public class CampManagementApplication {
     }
         // 수강생의 과목별 시험 회차 및 점수 등록
     private static void createScore () {
-        String studentId;
         Score targetScore;
         List<String> subjectIndex;
-
         do {
-            System.out.println("등록할 사용자의 ID를 입력하세요: ");
-            studentId = getStudentId();
-            String finalStudentId = studentId;
-            targetScore = scoreStore.stream()
-                    .filter(s -> s.getScoreId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            if (targetScore == null) {
-                System.out.println("등록되지 않은 사용자입니다.");
-            }
+            System.out.println("사용자의 ID를 입력하세요: ");
+            String studentId = getStudentId();
+            targetScore = identifyScore(studentId);
+            if (targetScore == null) {System.out.println("사용자 정보를 찾을 수 없습니다.");}
         } while (targetScore == null);
 
         System.out.println("시험 점수를 등록합니다...");
@@ -622,19 +574,9 @@ public class CampManagementApplication {
         Score targetScore;
         List<String> subjectIndex;
         boolean flag;
-
-        do {
-            System.out.println("수정할 사용자의 ID를 입력하세요: ");
-            studentId = getStudentId();
-            String finalStudentId = studentId;
-            targetScore = scoreStore.stream()
-                    .filter(s -> s.getScoreId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            if (targetScore == null) {
-                System.out.println("등록되지 않은 사용자입니다.");
-            }
-        } while (targetScore == null);
+        System.out.println("수정할 사용자의 ID를 입력하세요: ");
+        studentId = getStudentId();
+        targetScore = identifyScore(studentId);
 
         System.out.println("시험 점수를 수정합니다...");
         subjectIndex = targetScore.getSubjects();
@@ -668,20 +610,14 @@ public class CampManagementApplication {
 
     // 수강생의 특정 과목 회차별 등급 조회
     private static void inquireRoundGradeBySubject () {
-        String studentId;
         Score targetScore;
         List<String> subjectIndex;
+
         do {
             System.out.println("사용자의 ID를 입력하세요: ");
-            studentId = getStudentId();
-            String finalStudentId = studentId;
-            targetScore = scoreStore.stream()
-                    .filter(s -> s.getScoreId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            if (targetScore == null) {
-                System.out.println("등록되지 않은 사용자입니다.");
-            }
+            String studentId = getStudentId();
+            targetScore = identifyScore(studentId);
+            if (targetScore == null) {System.out.println("사용자 정보를 찾을 수 없습니다.");}
         } while (targetScore == null);
 
         subjectIndex = targetScore.getSubjects();
@@ -690,7 +626,6 @@ public class CampManagementApplication {
             System.out.println(subjectIndex);
             System.out.println("과목 ID를 입력하세요: ");
             subjectId = sc.next();
-
         } while (!targetScore.isValidSubjectId(subjectId));
 
         System.out.println("회차별 등급을 조회합니다...");
@@ -708,25 +643,7 @@ public class CampManagementApplication {
         List<Student> targetStudents = new ArrayList<>();
         System.out.println("학생들의 상태(Green, Red, Yellow)별 조회를 시작합니다.");
         System.out.println("조회할 상태를 입력하세요 (Green, Red, Yellow): ");
-        String status = "";
-        boolean flag = false;
-        while (!flag) {
-            System.out.print("\n상태(Green, Red, Yellow) : ");
-            status= sc.next();
-            if (status.equalsIgnoreCase("Green") || status.equalsIgnoreCase("G")) {
-                status = "Green";
-                flag = true;
-            }
-            else if (status.equalsIgnoreCase("Yellow") || status.equalsIgnoreCase("Y")) {
-                status = "Yellow";
-                flag = true;
-            } else if (status.equalsIgnoreCase("Red") || status.equalsIgnoreCase("R")) {
-                status = "Red";
-                flag = true;
-            } else {
-                System.out.println("Green / Red / Yellow 중 입력해주세요.");
-            }
-        }
+        String status = setStatus();
 
         for (Student student : studentStore) {
             if (student.getStudentFeeling().equals(status)) {
@@ -744,26 +661,11 @@ public class CampManagementApplication {
     }
 
     private static void deleteStudentAndScore () {
-        String studentId;
         Student targetStudent;
         Score targetScore;
 
-        do {
-            System.out.println("삭제할 사용자의 ID를 입력하세요: ");
-            studentId = getStudentId();
-            final String finalStudentId = studentId;
-            targetStudent = studentStore.stream()
-                    .filter(s -> s.getStudentId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            targetScore = scoreStore.stream()
-                    .filter(score -> score.getScoreId().equals(finalStudentId))
-                    .findFirst()
-                    .orElse(null);
-            if (targetStudent == null) {
-                System.out.println("등록되지 않은 사용자입니다.");
-            }
-        } while (targetStudent == null);
+        targetStudent = identifyStudent("delete");
+        targetScore = identifyScore(targetStudent.getStudentId());
 
         if (targetScore != null) {
             scoreStore.remove(targetScore);
