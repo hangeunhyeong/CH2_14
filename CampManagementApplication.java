@@ -171,10 +171,12 @@ public class CampManagementApplication {
     private static void createStudent() {
 
         System.out.println("\n수강생을 등록합니다...");
+        // 이름
         System.out.print("수강생 이름 입력: ");
         String studentName = sc.next();
         System.out.println("");
 
+        //상태
         System.out.println("현재 상태를 입력해 주세요.");
         System.out.println("좋음 :  Green / 안 좋음 : Red / 그저 그럼 : Yellow");
         String studentFeeling = "";
@@ -355,14 +357,17 @@ public class CampManagementApplication {
     private static void studentPerStatus(){
         List<Student> targetStudents = new ArrayList<>();
         System.out.println("학생들의 상태(Green, Red, Yellow)별 조회를 시작합니다.");
-        System.out.println("조회할 상태를 입력하세요 (Green, Red, Yellow): ");
         String status = "";
-        status = sc.nextLine();
-        boolean flag =status.equals("Yellow")||status.equals("Red")||status.equals("Green");
+        boolean flag = false;
         while(!flag){
-            System.out.println("상태를 다시 입력해주세요");
-            status = sc.nextLine();
-            flag=status.equals("Yellow")||status.equals("Red")||status.equals("Green");
+            System.out.print("조회할 상태를 입력하세요 (Green, Red, Yellow): ");
+            status = sc.next();
+            if(status.equals("Yellow")||status.equals("Red")||status.equals("Green")){
+                flag=true;
+            }
+            else{
+                System.out.println("Green / Red / Yellow 중 입력해주세요.");
+            }
         }
 
         for (Student student : studentStore) {
